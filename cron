@@ -1,0 +1,9 @@
+START=$(aws ec2 describe-tags --filters "Name=resource-type,Values=instance" "Name=key,Values=Name" "Name=value,Values=testec2" | grep ResourceId | cut -d : -f 2 | grep -o '".*"' | sed 's/"//g' | awk '{ print "aws ec2 start-instances --instance-ids " $0 }')     
+
+
+(crontab -l ; echo "46 * * * * $START | /bin/bash") | crontab -
+
+
+STOP=$(aws ec2 describe-tags --filters "Name=resource-type,Values=instance" "Name=key,Values=Name" "Name=value,Values=testec2" | grep ResourceId | cut -d : -f 2 | grep -o '".*"' | sed 's/"//g' | awk '{ print "aws ec2 stop-instances --instance-ids " $0 }')       
+
+(crontab -l ; echo "47 * * * * $STOP | /bin/bash") | crontab -
