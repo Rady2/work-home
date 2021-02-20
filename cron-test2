@@ -1,0 +1,26 @@
+#!/bin/bash
+
+
+STOPPED_STATUS=$(aws ec2 describe-instances --filters  "Name=instance-state-name,Values=stopped" "Name=tag-value,Values=testec2" | 
+grep stopped |  cut -d : -f 2 | grep -o '".*"' | sed 's/"//g')
+
+START_STATUS=$(aws ec2 describe-instances --filters  "Name=instance-state-name,Values=running" "Name=tag-value,Values=testec2" | grep running |  cut -d : -f 2 | grep -o '".*"' | sed 's/"//g')
+
+
+if [ "$STOPPED_STATUS" = "stopped" ]
+then
+        aws ec2 describe-tags --filters "Name=resource-type,Values=instance" "Name=key,Values=Name" "Name=value,Values=testec2" | grep ResourceId | cut -d : -f 2 | grep -o '".*"' | sed 's/"//g' | awk '{ print "aws ec2 start-instances --instance-ids " $0 }' | /bin/bash
+
+else
+        :
+fi
+
+
+if [ "$START_STATUS" = "running" ]
+then
+         aws ec2 describe-tags --filters "Name=resource-type,Values=instance" "Name=key,Values=Name" "Name=value,Values=testec2" | 
+grep ResourceId | cut -d : -f 2 | grep -o '".*"' | sed 's/"//g' | awk '{ print "aws ec2 stop-instances --instance-ids " $0 }' | /bin/bash
+
+        else
+         :
+fi
